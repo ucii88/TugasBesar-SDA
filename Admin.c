@@ -283,3 +283,41 @@ void admin_login() {
         exit(1);
     }
 }
+
+void admin_menu() {
+    int choice;
+    while (1) {
+        system("cls"); 
+        printf("\n==========================================\n");
+        printf("               ADMIN MENU                 \n");
+        printf("==========================================\n");
+        printf("1. Lihat Antrian per Loket\n");
+        printf("2. Proses Tiket Antrian\n");
+        printf("3. Keluar\n");
+        printf("==========================================\n");
+        printf("Pilihan Anda: ");
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                tampil_antrian_perloket();
+                break;
+            case 2:
+                proses_tiket();
+                break;
+            case 3:
+                system("cls"); 
+                printf("\n==========================================\n");
+                printf("       Terima kasih! Sampai jumpa lagi.   \n");
+                printf("==========================================\n");
+                return;
+            default:
+                printf("\nPilihan tidak valid. Mohon masukkan angka 1, 2, atau 3.\n");
+
+                getchar(); 
+                getchar(); 
+        }
+        getchar();
+        getchar(); 
+    }
+}

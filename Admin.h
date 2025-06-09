@@ -6,10 +6,12 @@
 #include <stdlib.h>
 
 #define MAX_STRING 50
-#include "user.h"
+#include "User.h"
 
 void tampil_antrian_perloket();
 void proses_tiket();
 void admin_login();
+void admin_menu();
+
 
 #endif

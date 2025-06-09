@@ -24,5 +24,7 @@ extern int dest_count;
 int register_user();
 int login_user();
 void ambil_kodeLoket(char* destinasi, char* result, TreeNode* root);
+int harga_tiket(char* destinasi, TreeNode* root);
+void beli_tiket(TreeNode* root);
 
 #endif

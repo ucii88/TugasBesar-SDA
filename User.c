@@ -92,8 +92,8 @@ void ambil_kodeLoket(char* destinasi, char* result, TreeNode* root) {
     strcpy(result, "");
 
     
-    void search_node(TreeNode* node, char* dest, char* res) {
-        if (node == NULL) return;
+    void search_node(TreeNode* node, char* dest, char* res) { 
+                if (node == NULL) return;
 
         if (strcmp(node->city, dest) == 0) {
             strcpy(res, node->kode_loket);
@@ -106,9 +106,10 @@ void ambil_kodeLoket(char* destinasi, char* result, TreeNode* root) {
 
         search_node(node->next_brother, dest, res);
     }
-    
-     search_node(root, destinasi, result);
+
+    search_node(root, destinasi, result);
 }
+
 
 int harga_tiket(char* destinasi, TreeNode* root) {
     Stack rute_stack;
@@ -253,3 +254,94 @@ void beli_tiket(TreeNode* root) {
         printf("             Gagal menyimpan data tiket! Mohon coba lagi.\n");
  }
 } 
+
+
+void tampil_riwayat() {
+    system("cls"); 
+    if (strlen(current_user) == 0) {
+        printf("                                    Silahkan login terlebih dahulu untuk melihat riwayat!\n");
+        return;
+    }
+
+    char filename[MAX_STRING];
+    sprintf(filename, "%s.txt", current_user);
+    FILE* file = fopen(filename, "r");
+    if (file != NULL) {
+        printf("\n======================================================================================\n");
+        printf("                                RIWAYAT PEMBELIAN TIKET                                                                     \n");
+        printf("========================================================================================\n");
+        printf("| %s | %s | %s | %s | %s | %s |\n", "Nama", "Destinasi", "Jadwal", "Tiket", "Harga", "Status & Waktu Pemesanan");
+        printf("========================================================================================\n");
+
+        char line[200];
+        int first_entry = 1; 
+        while (fgets(line, sizeof(line), file)) {
+            char dest[MAX_STRING], jadwal[MAX_STRING], status[MAX_STRING], time_str[MAX_STRING];
+            int tiket, harga;
+
+            if (sscanf(line, "%[^|]|%[^|]|%d|%d|%[^|]|%[^\n]", dest, jadwal, &tiket, &harga, status, time_str) == 6) {
+                if (first_entry && strcmp(time_str, "1970-01-01 00:00:00") == 0) {
+                    first_entry = 0;
+                    continue;
+                }
+                char status_time[50];
+                snprintf(status_time, sizeof(status_time), "%s | %s", status, time_str);
+                printf("| %s | %s | %s | %d | %d | %s |\n",
+                    current_user, dest, jadwal, tiket, harga, status_time);
+        		printf("----------------------------------------------------------------------------------------\n");
+            }
+        }
+        fclose(file);
+        printf("\n=======================================================================================\n");
+    } else {
+        printf("                                    Tidak ada riwayat pembelian tiket yang ditemukan.\n");
+        printf("                                 ========================================\n");
+    }
+}
+
+void user_menu(TreeNode* root) {
+    int choice;
+    while (1) {
+        system("cls");
+		printf("\n                                 ==========================================\n"); 
+        printf("                                           SELAMAT DATANG, %s!          \n", current_user);
+        printf("                                 ==========================================\n");
+        printf("                                 |           === MENU UTAMA ===           |  \n");
+        printf("                                 ------------------------------------------\n");
+        printf("                                 |                                        |\n");
+        printf("                                 |      (1.) Beli Tiket Penerbangan       |\n");
+        printf("                                 |      (2.) Lihat Riwayat Pembelian      |\n");
+        printf("                                 |      (3.) Logout                       |\n");
+        printf("                                 |                                        |\n");
+        printf("                                 ------------------------------------------\n");
+        printf("                                                  = ");
+        scanf("%d", &choice);
+        while (getchar() != '\n');
+
+
+ 		switch (choice) {
+            case 1:
+                beli_tiket(root);
+                break;
+            case 2:
+                tampil_riwayat();
+                break;
+            case 3:
+                strcpy(current_user, "");
+                system("cls"); 
+                printf("\n                                 | Berhasil logout. Sampai jumpa kembali! |\n");
+                printf("                                 ===========================================\n");
+                return;
+            default:
+                printf("                                    Pilihan tidak valid! Mohon input sesuai menu.\n");
+        }
+        getchar();
+    }
+}
+
+void print_centered(const char* text) {
+    int padding = (CONSOLE_WIDTH - strlen(text)) / 2;
+    int i;
+    for (i = 0; i < padding; i++) printf(" ");
+    printf("%s\n", text);
+}

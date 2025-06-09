@@ -18,7 +18,7 @@
 #include "Queue.h"
 
 extern char current_user[MAX_STRING];
-
+extern char destinasi[][MAX_STRING];
 extern int dest_count;
 
 int register_user();
@@ -26,5 +26,9 @@ int login_user();
 void ambil_kodeLoket(char* destinasi, char* result, TreeNode* root);
 int harga_tiket(char* destinasi, TreeNode* root);
 void beli_tiket(TreeNode* root);
+void tampil_riwayat();
+void user_menu(TreeNode* root);
+void print_centered(const char* text);
+
 
 #endif

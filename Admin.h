@@ -9,6 +9,7 @@
 #include "user.h"
 
 void tampil_antrian_perloket();
+void proses_tiket();
 void admin_login();
 
 #endif

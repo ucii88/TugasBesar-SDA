@@ -83,6 +83,186 @@ void tampil_antrian_perloket() {
     printf("==========================================\n");
 }
 
+void proses_tiket() {
+    system("cls"); 
+
+    char main_loket[2];
+    printf("\n==========================================\n");
+    printf("          PROSES TIKET ANTRIAN            \n");
+    printf("==========================================\n");
+    printf("Loket utama yang akan diproses (A, B, atau C): ");
+    scanf("%1s", main_loket);
+
+    if (main_loket[0] != 'A' && main_loket[0] != 'B' && main_loket[0] != 'C') {
+        printf("Kode loket utama tidak valid! Gunakan A, B, atau C.\n");
+        return;
+    }
+
+    printf("\nPilih sub-loket yang akan diproses %c:\n", main_loket[0]);
+    int sub_loket_count = 0;
+    int i;
+    for (i = 0; i < dest_count; i++) {
+        if (destinasi[i][0] == main_loket[0]) {
+            sub_loket_count++;
+            printf("%d. %s\n", sub_loket_count, destinasi[i]);
+        }
+    }
+
+    if (sub_loket_count == 0) {
+        printf("Tidak ada sub-loket yang tersedia untuk loket utama %c.\n", main_loket[0]);
+        return;
+    }
+
+    int choice;
+    printf("Pilih nomor sub-loket (1-%d): ", sub_loket_count);
+    scanf("%d", &choice);
+
+    if (choice < 1 || choice > sub_loket_count) {
+        printf("Pilihan tidak valid! Harus antara 1 dan %d.\n", sub_loket_count);
+        return;
+    }
+
+    char pilihan_loket[MAX_STRING];
+    int current_index = 0;
+    for (i = 0; i < dest_count; i++) {
+        if (destinasi[i][0] == main_loket[0]) {
+            current_index++;
+            if (current_index == choice) {
+                strcpy(pilihan_loket, destinasi[i]);
+                break;
+            }
+        }
+    }
+
+    char queue_filename[MAX_STRING];
+    sprintf(queue_filename, "./queues/queue_%s.txt", pilihan_loket);
+
+    FILE* file = fopen(queue_filename, "r");
+    if (file == NULL) {
+        printf("Tidak ada antrian untuk loket %s saat ini!\n", pilihan_loket);
+        return;
+    }
+
+    char line[200];
+    if (!fgets(line, sizeof(line), file)) {
+        fclose(file);
+        printf("Antrian untuk sub-loket %s kosong.\n", pilihan_loket);
+        return;
+    }
+
+    line[strcspn(line, "\n")] = 0;
+
+    if (strlen(line) == 0) {
+        fclose(file);
+        printf("Antrian kosong atau data tidak valid.\n");
+        return;
+    }
+
+    char username[MAX_STRING], destinasi[MAX_STRING], kode_loket[MAX_STRING], jadwal[MAX_STRING], time_str[MAX_STRING];
+    int tiket, harga;
+
+    int sscanf_result = sscanf(line, "%[^|]|%[^|]|%[^|]|%[^|]|%d|%d|%[^\n]", 
+                              username, destinasi, kode_loket, jadwal, &tiket, &harga, time_str);
+    if (sscanf_result != 7) {
+        printf("Error: Gagal membaca data tiket. Jumlah elemen yang diparsing: %d\n", sscanf_result);
+        fclose(file);
+        return;
+    }
+    
+    system("cls"); 
+    printf("\n==========================================\n");
+    printf("              DETAIL TIKET         \n");
+    printf("==========================================\n");
+    printf("  Username  : %s\n", username);
+    printf("  Destinasi : %s\n", destinasi);
+    printf("  Loket     : %s\n", kode_loket);
+    printf("  Jadwal    : %s\n", jadwal);
+    printf("  Tiket     : %d\n", tiket);
+    printf("  Total Harga: Rp %d\n", harga);
+    printf("  Waktu     : %s\n", time_str);
+    printf("------------------------------------------\n");
+
+    int proses;
+    printf("(1.) Approve Tiket\n");
+    printf("(2.) Reject Tiket\n");
+    printf("     = ");
+    scanf("%d", &proses);
+
+    char new_status[MAX_STRING];
+    if (proses == 1) {
+        strcpy(new_status, "Sudah Melakukan Check-In");
+        printf("\n Tiket berhasil di-APPROVE!\n");
+    } else if (proses == 2) {
+        strcpy(new_status, "Rejected");
+        printf("\n Tiket berhasil di-REJECT!\n");
+    } else {
+        printf("\nInput tidak valid. Pembatalan proses.\n");
+        fclose(file);
+        return;
+    }
+
+    char user_filename[MAX_STRING];
+    sprintf(user_filename, "%s.txt", username);
+
+    FILE* user_file = fopen(user_filename, "r");
+    FILE* temp_file = fopen("temp.txt", "w");
+
+    if (user_file != NULL && temp_file != NULL) {
+        char line[200];
+        while (fgets(line, sizeof(line), user_file)) {
+            char dest[MAX_STRING], sched[MAX_STRING], stat[MAX_STRING], timestr[MAX_STRING];
+            int tix, pri;
+            if (sscanf(line, "%[^|]|%[^|]|%d|%d|%[^|]|%[^\n]", 
+                      dest, sched, &tix, &pri, stat, timestr) == 6) {
+                if (strcmp(dest, destinasi) == 0 && 
+                    strcmp(sched, jadwal) == 0 && 
+                    tix == tiket && 
+                    pri == harga && 
+                    strcmp(timestr, time_str) == 0 && 
+                    strcmp(stat, "Dalam Antrian Check-In") == 0) {
+                    fprintf(temp_file, "%s|%s|%d|%d|%s|%s\n", 
+                            dest, jadwal, tiket, harga, new_status, time_str);
+                } else {
+                    fprintf(temp_file, "%s", line);
+                }
+            } else {
+                fprintf(temp_file, "%s", line);
+            }
+        }
+        
+        fclose(user_file);
+        fclose(temp_file);
+        remove(user_filename);
+        rename("temp.txt", user_filename);
+    } else {
+        printf("Error: Gagal membuka file user atau file sementara.\n");
+    }
+
+    fclose(file);
+    file = fopen(queue_filename, "r");
+    temp_file = fopen("temp.txt", "w");
+
+    if (file != NULL && temp_file != NULL) {
+        char line[200];
+        int first = 1;
+        while (fgets(line, sizeof(line), file)) {
+            if (first) {
+                first = 0;
+                continue;
+            }
+            fprintf(temp_file, "%s", line);
+        }
+        fclose(file);
+        fclose(temp_file);
+        remove(queue_filename);
+        rename("temp.txt", queue_filename);
+    } else {
+        printf("Error: Gagal membuka file antrian atau file sementara.\n");
+    }
+
+    printf("\nProses selesai!\n");
+}
+
 void admin_login() {
     system("cls"); 
     char username[MAX_STRING], password[MAX_STRING];

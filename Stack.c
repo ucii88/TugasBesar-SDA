@@ -1,5 +1,5 @@
 #include "Stack.h"
-#include "tree.h"
+#include "Tree.h"
 
 void init_stack(Stack* s) {
     s->top = -1;

@@ -19,7 +19,10 @@
 
 extern char current_user[MAX_STRING];
 
+extern int dest_count;
+
 int register_user();
 int login_user();
+void ambil_kodeLoket(char* destinasi, char* result, TreeNode* root);
 
 #endif

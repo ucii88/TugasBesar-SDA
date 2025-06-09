@@ -87,3 +87,25 @@ int login_user() {
     printf("                                 ========================================\n");
     return 0;
 }
+
+void ambil_kodeLoket(char* destinasi, char* result, TreeNode* root) {
+    strcpy(result, "");
+
+    
+    void search_node(TreeNode* node, char* dest, char* res) {
+        if (node == NULL) return;
+
+        if (strcmp(node->city, dest) == 0) {
+            strcpy(res, node->kode_loket);
+            return;
+        }
+
+        search_node(node->first_son, dest, res);
+        
+        if (strlen(res) > 0) return;
+
+        search_node(node->next_brother, dest, res);
+    }
+    
+     search_node(root, destinasi, result);
+}
